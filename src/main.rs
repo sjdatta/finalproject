@@ -1,13 +1,6 @@
 fn main() {
-    
-    //let m = readfile("example.txt");
-    //let f = lengths(m.clone());
-    //println!("{:?}", f);
-    //println!("{:?}", breadth(m));
-    
     let m = finalfunction("example.txt");
-    
-    
+
 
     
 }
@@ -18,7 +11,7 @@ use std::io::prelude::*;
 use std::io;
 
 
-
+//this function reads a file
 fn readfile(path: &str) -> Vec<(usize, usize)> {
     let mut result: Vec<(usize, usize)> = Vec::new();
     let file = File::open(path).expect("Could not open file");
@@ -39,16 +32,13 @@ fn readfile(path: &str) -> Vec<(usize, usize)> {
 
 
 
-//let's find some out some basic info about our dataset
-
-
-//finding average number of products copurchased
-
+//this function takes in a vector of edges and computes several things about it
+//1. the average number of connections, 2. the maximum number of connections, and 3. the minimum number of connections
+//it returns a vector with this data in that order
 fn lengths(v: Vec<(usize, usize)>) -> Vec<usize> {
-    //reorganizing the vector to make it easier
+
+    //reorganizing the vector to make the data analysis easier
     let n = v.len();
-
-
     let mut graph_list : Vec<Vec<usize>> = vec![vec![];n];
     for (v,w) in v.iter() {
         graph_list[*v].push(*w);
@@ -56,7 +46,7 @@ fn lengths(v: Vec<(usize, usize)>) -> Vec<usize> {
     
     }
     
-    
+    //finding the total number of connections for finding the average
     let mut tally: Vec<usize> = vec![0; graph_list.len()];
     for i in 0..graph_list.len() {
         let amount = graph_list[i].len();
@@ -68,12 +58,15 @@ fn lengths(v: Vec<(usize, usize)>) -> Vec<usize> {
     
 
     let mut data: Vec<usize> = vec![0;3];
-    //let's find the average
+
+    //instantiate some variables for the average, minimum, and maximum
+
     let mut total = 0;
     let mut min = tally[0];
     let mut max = tally[0];
 
     for j in 0..tally.len() {
+        //find total
         total += tally[j];
 
 
@@ -104,6 +97,8 @@ fn lengths(v: Vec<(usize, usize)>) -> Vec<usize> {
     
 }
 
+//this function finds the maximum node in a vector of edges. This helps with making sure I create certain variables 
+//(like graph variables in other function) to the proper length. 
 
 fn findmax(edges: Vec<(usize, usize)>) -> usize {
     let mut max = edges[0].1;
@@ -118,6 +113,7 @@ fn findmax(edges: Vec<(usize, usize)>) -> usize {
     max
 }
 
+//starting to create the framework for constructing a Graph, which we can then implement our breadth first searches on
 type Vertex = usize;
 type ListOfEdges = Vec<(Vertex,Vertex)>;
 type AdjacencyLists = Vec<Vec<Vertex>>;
@@ -167,17 +163,20 @@ impl Graph {
     }
 }
 
-//let's do a breadth first search to find out how connected a specific node is to the other nodes
+//doing the breadth first search by getting user input and finding the distances from that node
 
 use std::collections::VecDeque;
-
 fn breadth(edges: Vec<(usize, usize)>) -> Vec<Option<u32>> {
+
+    //get the user input
 
     let mut start = String::new();
     io::stdin().read_line(&mut start).expect("Failed to read line");
     let start = start.trim();
     let start: usize = start.parse().expect("Not a good number!");
 
+
+    //create the graph
     let n = findmax(edges.clone()) + 1;
     let graph = Graph::create_undirected(n, &edges);
     let mut distance: Vec<Option<u32>> = vec![None;graph.n];
@@ -200,7 +199,7 @@ fn breadth(edges: Vec<(usize, usize)>) -> Vec<Option<u32>> {
 }
 
 
-
+//I wanted a function that would organize all of my function and print statements in a nice, organized fashion.
 fn finalfunction(path: &str) {
     let file = readfile(path);
     let data = lengths(file.clone());
@@ -208,20 +207,30 @@ fn finalfunction(path: &str) {
     and the minimum number of connections is {}", data[0], data[1], data[2]);
     println!("Please input the node number that you want to see the distances to:");
     let distance = breadth(file);
+
+
     print!("vertex:distance");
+    let mut finalvec = vec![vec![0, 0];distance.len()];
+
     for v in 0..distance.len() {
-    print!("   {}:{}",v,distance[v].unwrap());
+        finalvec[v][0] = distance[v];
+        finalvec[v][1] = v;
+    
+   // print!("   {}:{}",v,distance[v].unwrap());
     }
 
-
+    finalvec.sort();
+    println!("the maximum distance is {} from node {}", finalvec[distance.len()][0], finalvec[distance.len()][1] );
     
+
 
 }
 
 
+
+
 #[test]
 //test to make sure our average/max/min function "lengths" works
-
 fn testlengths() {
     let example = readfile("example.txt");
     let m = lengths(example);
@@ -230,6 +239,7 @@ fn testlengths() {
 
 }
 #[test]
+//test to make sure that the breadth function works as intended
 fn testbreadth() {
     let example = readfile("example.txt");
     let m = breadth(example, 2);
