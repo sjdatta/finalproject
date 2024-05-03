@@ -1,7 +1,11 @@
 fn main() {
-    let m = readfile("example.txt");
-    let f = lengths(m.clone());
-    println!("{:?}", breadth(m, 2, f[3]));
+    
+    //let m = readfile("example.txt");
+    //let f = lengths(m.clone());
+    //println!("{:?}", f);
+    //println!("{:?}", breadth(m));
+    
+    let m = finalfunction("example.txt");
     
     
 
@@ -11,6 +15,8 @@ fn main() {
 
 use std::fs::File;
 use std::io::prelude::*;
+use std::io;
+
 
 
 fn readfile(path: &str) -> Vec<(usize, usize)> {
@@ -61,7 +67,7 @@ fn lengths(v: Vec<(usize, usize)>) -> Vec<usize> {
 
     
 
-    let mut data: Vec<usize> = vec![0;4];
+    let mut data: Vec<usize> = vec![0;3];
     //let's find the average
     let mut total = 0;
     let mut min = tally[0];
@@ -90,14 +96,28 @@ fn lengths(v: Vec<(usize, usize)>) -> Vec<usize> {
     data[1] = max;
     //min
     data[2] = min;
-    //number of nodes
-    data[3] = tally.len();
+    
 
     return data;
 
 
     
 }
+
+
+fn findmax(edges: Vec<(usize, usize)>) -> usize {
+    let mut max = edges[0].1;
+    for i in 0..edges.len() {
+        if max < edges[i].0 {
+            max = edges[i].0;
+        } else if max < edges[i].1 {
+            max = edges[i].1;
+        }
+    }
+
+    max
+}
+
 type Vertex = usize;
 type ListOfEdges = Vec<(Vertex,Vertex)>;
 type AdjacencyLists = Vec<Vec<Vertex>>;
@@ -151,7 +171,14 @@ impl Graph {
 
 use std::collections::VecDeque;
 
-fn breadth(edges: Vec<(usize, usize)>, start:usize, n:usize) -> Vec<Option<u32>> {
+fn breadth(edges: Vec<(usize, usize)>) -> Vec<Option<u32>> {
+
+    let mut start = String::new();
+    io::stdin().read_line(&mut start).expect("Failed to read line");
+    let start = start.trim();
+    let start: usize = start.parse().expect("Not a good number!");
+
+    let n = findmax(edges.clone()) + 1;
     let graph = Graph::create_undirected(n, &edges);
     let mut distance: Vec<Option<u32>> = vec![None;graph.n];
     distance[start] = Some(0);
@@ -174,7 +201,22 @@ fn breadth(edges: Vec<(usize, usize)>, start:usize, n:usize) -> Vec<Option<u32>>
 
 
 
+fn finalfunction(path: &str) {
+    let file = readfile(path);
+    let data = lengths(file.clone());
+    println!("Here's some information about your graph. The average connections is {}, the maximum connection is {}, 
+    and the minimum number of connections is {}", data[0], data[1], data[2]);
+    println!("Please input the node number that you want to see the distances to:");
+    let distance = breadth(file);
+    print!("vertex:distance");
+    for v in 0..distance.len() {
+    print!("   {}:{}",v,distance[v].unwrap());
+    }
 
+
+    
+
+}
 
 
 #[test]
@@ -186,5 +228,11 @@ fn testlengths() {
 
     assert_eq!(m, [2, 5, 0], "test failed");
 
+}
+#[test]
+fn testbreadth() {
+    let example = readfile("example.txt");
+    let m = breadth(example, 2);
+    assert_eq!(m, [Some(2), Some(2), Some(0), Some(1), Some(2)], "test failed");
 }
 
