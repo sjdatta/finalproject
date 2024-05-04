@@ -1,10 +1,10 @@
 fn main() {
-    let m = finalfunction("example.txt");
+    let m = finalfunction("amazon.txt");
 
 
     
 }
-
+use crate::lengths::lengths;
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -18,7 +18,7 @@ fn readfile(path: &str) -> Vec<(usize, usize)> {
     let buf_reader = std::io::BufReader::new(file).lines();
     for line in buf_reader {
         let line_str = line.expect("Error reading");
-        let v: Vec<&str> = line_str.trim().split(' ').collect();
+        let v: Vec<&str> = line_str.trim().split_whitespace().collect();
         let x = v[0].parse::<usize>().unwrap();
         let y = v[1].parse::<usize>().unwrap();
         result.push((x, y));
@@ -35,67 +35,80 @@ fn readfile(path: &str) -> Vec<(usize, usize)> {
 //this function takes in a vector of edges and computes several things about it
 //1. the average number of connections, 2. the maximum number of connections, and 3. the minimum number of connections
 //it returns a vector with this data in that order
-fn lengths(v: Vec<(usize, usize)>) -> Vec<usize> {
 
-    //reorganizing the vector to make the data analysis easier
-    let n = v.len();
-    let mut graph_list : Vec<Vec<usize>> = vec![vec![];n];
-    for (v,w) in v.iter() {
-        graph_list[*v].push(*w);
-        graph_list[*w].push(*v);
-    
-    }
-    
-    //finding the total number of connections for finding the average
-    let mut tally: Vec<usize> = vec![0; graph_list.len()];
-    for i in 0..graph_list.len() {
-        let amount = graph_list[i].len();
-        tally[i] = amount;
+//split this into a module because it can be used in many different ways
+//not just for this project necessarily
+
+pub mod lengths {
+    use crate::findmax;
+    pub fn lengths(v: Vec<(usize, usize)>) -> Vec<usize> {
+
+        //reorganizing the vector to make the data analysis easier
+        let n = findmax(v.clone()) + 1;
+        let mut graph_list : Vec<Vec<usize>> = vec![vec![];n];
+        for (v,w) in v.iter() {
+            graph_list[*v].push(*w);
+            graph_list[*w].push(*v);
         
 
+        }
+        //println!("{:?}", graph_list);
+        //finding the total number of connections for finding the average
+        let mut tally: Vec<usize> = vec![0; graph_list.len()];
+        for i in 0..graph_list.len() {
+            let amount = graph_list[i].len();
+            tally[i] = amount;
+            
+    
+        }
+    
+        
+    
+        let mut data: Vec<usize> = vec![0;3];
+    
+        //instantiate some variables for the average, minimum, and maximum
+    
+        let mut total = 0;
+        let mut min = tally[0];
+
+        let mut max = tally[0];
+       // println!("{:?}", tally);
+    
+        for j in 0..tally.len() {
+            //find total
+            total += tally[j];
+    
+    
+            //find minimum
+            if tally[j] < min {
+                min = tally[j];
+            }
+    
+            //find max
+            if tally[j] > max {
+                max = tally[j];
+            }
+    
+        }
+    
+    
+        //average
+        data[0] = total/tally.len();
+        //max
+        data[1] = max;
+        //min
+        data[2] = min;
+        
+    
+        return data;
+    
+    
+        
     }
 
-    
-
-    let mut data: Vec<usize> = vec![0;3];
-
-    //instantiate some variables for the average, minimum, and maximum
-
-    let mut total = 0;
-    let mut min = tally[0];
-    let mut max = tally[0];
-
-    for j in 0..tally.len() {
-        //find total
-        total += tally[j];
-
-
-        //find minimum
-        if tally[j] < min {
-            min = tally[j];
-        }
-
-        //find max
-        if tally[j] > max {
-            max = tally[j];
-        }
-
-    }
-
-
-    //average
-    data[0] = total/tally.len();
-    //max
-    data[1] = max;
-    //min
-    data[2] = min;
-    
-
-    return data;
-
-
-    
 }
+
+
 
 //this function finds the maximum node in a vector of edges. This helps with making sure I create certain variables 
 //(like graph variables in other function) to the proper length. 
@@ -165,6 +178,7 @@ impl Graph {
 
 //doing the breadth first search by getting user input and finding the distances from that node
 
+
 use std::collections::VecDeque;
 fn breadth(edges: Vec<(usize, usize)>) -> Vec<Option<u32>> {
 
@@ -203,9 +217,9 @@ fn breadth(edges: Vec<(usize, usize)>) -> Vec<Option<u32>> {
 fn finalfunction(path: &str) {
     let file = readfile(path);
     let data = lengths(file.clone());
-    println!("Here's some information about your graph. The average connections is {}, the maximum connection is {}, 
+    println!("Here's some information about your graph. The average connections a node has is {}, the maximum amount of connections is {}, 
     and the minimum number of connections is {}", data[0], data[1], data[2]);
-    println!("Please input the node number that you want to see the distances to:");
+    println!("Please input the node number that you want to see the distances to: ");
     let distance = breadth(file);
 
 
@@ -213,14 +227,23 @@ fn finalfunction(path: &str) {
     let mut finalvec = vec![vec![0, 0];distance.len()];
 
     for v in 0..distance.len() {
-        finalvec[v][0] = distance[v];
-        finalvec[v][1] = v;
+        if distance[v] == None{
+            finalvec[v][0] = 0;
+            finalvec[v][1] = v as u32;
+            print!("   {}:{}",v, 0);
+        } else {
+            finalvec[v][0] = distance[v].unwrap();
+            finalvec[v][1] = v as u32;
     
-   // print!("   {}:{}",v,distance[v].unwrap());
+            print!("   {}:{}",v,distance[v].unwrap());
+
+        }
+        
     }
+    println!();
 
     finalvec.sort();
-    println!("the maximum distance is {} from node {}", finalvec[distance.len()][0], finalvec[distance.len()][1] );
+    println!("the maximum distance is {} from node {}", finalvec[distance.len() -1][0], finalvec[distance.len() -1][1] );
     
 
 
