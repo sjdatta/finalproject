@@ -1,11 +1,17 @@
 fn main() {
-    let m = finalfunction("amazon.txt");
+    //let m = finalfunction("example.txt");
+    let m = readfile("example.txt");
+    let s = lengths(m.clone());
+    println!("{:?}", s);
+     
 
 
     
 }
-use crate::lengths::lengths;
 
+
+
+use crate::lengths::lengths;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io;
@@ -177,17 +183,21 @@ impl Graph {
 }
 
 //doing the breadth first search by getting user input and finding the distances from that node
-
-
-use std::collections::VecDeque;
-fn breadth(edges: Vec<(usize, usize)>) -> Vec<Option<u32>> {
-
+fn userinput() -> usize {
     //get the user input
 
     let mut start = String::new();
     io::stdin().read_line(&mut start).expect("Failed to read line");
     let start = start.trim();
     let start: usize = start.parse().expect("Not a good number!");
+    start
+
+}
+
+use std::collections::VecDeque;
+fn breadth(edges: Vec<(usize, usize)>, start: usize) -> Vec<Option<u32>> {
+
+    
 
 
     //create the graph
@@ -220,7 +230,8 @@ fn finalfunction(path: &str) {
     println!("Here's some information about your graph. The average connections a node has is {}, the maximum amount of connections is {}, 
     and the minimum number of connections is {}", data[0], data[1], data[2]);
     println!("Please input the node number that you want to see the distances to: ");
-    let distance = breadth(file);
+    let num = userinput();
+    let distance = breadth(file, num);
 
 
     print!("vertex:distance");
@@ -255,10 +266,11 @@ fn finalfunction(path: &str) {
 #[test]
 //test to make sure our average/max/min function "lengths" works
 fn testlengths() {
+    use crate::lengths::lengths;
     let example = readfile("example.txt");
     let m = lengths(example);
 
-    assert_eq!(m, [2, 5, 0], "test failed");
+    assert_eq!(m, [2, 5, 1], "test failed");
 
 }
 #[test]
