@@ -1,17 +1,12 @@
+mod lengths;
 fn main() {
-    //let m = finalfunction("example.txt");
-    let m = readfile("example.txt");
-    let s = lengths(m.clone());
-    println!("{:?}", s);
-     
+    let m = finalfunction("amazon.txt");
 
 
     
 }
 
-
-
-use crate::lengths::lengths;
+use crate::lengths::lengths::lengths;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io;
@@ -35,86 +30,6 @@ fn readfile(path: &str) -> Vec<(usize, usize)> {
     
     
 }
-
-
-
-//this function takes in a vector of edges and computes several things about it
-//1. the average number of connections, 2. the maximum number of connections, and 3. the minimum number of connections
-//it returns a vector with this data in that order
-
-//split this into a module because it can be used in many different ways
-//not just for this project necessarily
-
-pub mod lengths {
-    use crate::findmax;
-    pub fn lengths(v: Vec<(usize, usize)>) -> Vec<usize> {
-
-        //reorganizing the vector to make the data analysis easier
-        let n = findmax(v.clone()) + 1;
-        let mut graph_list : Vec<Vec<usize>> = vec![vec![];n];
-        for (v,w) in v.iter() {
-            graph_list[*v].push(*w);
-            graph_list[*w].push(*v);
-        
-
-        }
-        //println!("{:?}", graph_list);
-        //finding the total number of connections for finding the average
-        let mut tally: Vec<usize> = vec![0; graph_list.len()];
-        for i in 0..graph_list.len() {
-            let amount = graph_list[i].len();
-            tally[i] = amount;
-            
-    
-        }
-    
-        
-    
-        let mut data: Vec<usize> = vec![0;3];
-    
-        //instantiate some variables for the average, minimum, and maximum
-    
-        let mut total = 0;
-        let mut min = tally[0];
-
-        let mut max = tally[0];
-       // println!("{:?}", tally);
-    
-        for j in 0..tally.len() {
-            //find total
-            total += tally[j];
-    
-    
-            //find minimum
-            if tally[j] < min {
-                min = tally[j];
-            }
-    
-            //find max
-            if tally[j] > max {
-                max = tally[j];
-            }
-    
-        }
-    
-    
-        //average
-        data[0] = total/tally.len();
-        //max
-        data[1] = max;
-        //min
-        data[2] = min;
-        
-    
-        return data;
-    
-    
-        
-    }
-
-}
-
-
 
 //this function finds the maximum node in a vector of edges. This helps with making sure I create certain variables 
 //(like graph variables in other function) to the proper length. 
@@ -197,7 +112,6 @@ fn userinput() -> usize {
 use std::collections::VecDeque;
 fn breadth(edges: Vec<(usize, usize)>, start: usize) -> Vec<Option<u32>> {
 
-    
 
 
     //create the graph
@@ -262,7 +176,6 @@ fn finalfunction(path: &str) {
 
 
 
-
 #[test]
 //test to make sure our average/max/min function "lengths" works
 fn testlengths() {
@@ -280,4 +193,3 @@ fn testbreadth() {
     let m = breadth(example, 2);
     assert_eq!(m, [Some(2), Some(2), Some(0), Some(1), Some(2)], "test failed");
 }
-
